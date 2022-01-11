@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="EntityFrameworkCore.Query" Version="1.3.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="coverlet.collector" Version="3.1.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GNB_TransRates.API\GNB_TransRates.API.csproj" />
+    <ProjectReference Include="..\GNB_TransRates.DAL\GNB_TransRates.DAL.csproj" />
+    <ProjectReference Include="..\GNB_TransRates.DL\GNB_TransRates.DL.csproj" />
+    <ProjectReference Include="..\GNB_TransRates\GNB_TransRates.API.csproj" />
+    <ProjectReference Include="..\Repository\GNB_TransRates.DAL.csproj" />
+    <ProjectReference Include="..\Service\GNB_TransRates.DL.csproj" />
+  </ItemGroup>
+
+</Project>
