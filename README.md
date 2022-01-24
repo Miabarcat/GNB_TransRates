@@ -41,6 +41,7 @@ api/transactions/list | Retrieve transactions list
 ````Currency```` Transaction currency
 
 
+
 Resource | GET
 ------ | ------ 
 api/transactions/listbysku?sku= | Retrieve transactions list from specific sku
@@ -71,6 +72,8 @@ api/transactions/listbysku?sku= | Retrieve transactions list from specific sku
 
 ````Currency```` Always EUR
 
+
+
 Resource | GET
 ------ | ------ 
 api/rates/list | Retrieve rates list
@@ -95,6 +98,7 @@ api/rates/list | Retrieve rates list
 ````To```` Destination currency
 
 ````Rate```` Rate amount
+
 
 
 ### Status codes
