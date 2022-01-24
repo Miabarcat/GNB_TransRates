@@ -1,3 +1,4 @@
+using FluentAssertions;
 using GNB_TransRates.DAL.Models;
 using GNB_TransRates.DL.Repositories;
 using GNB_TransRates.DL.Services;
@@ -57,8 +58,10 @@ namespace GNB_TransRates.Tests
             // Act
             var entities = Service.GetAsync().Result;
             // Assert
-            Repository.Verify(x => x.GetAll(), Times.Once);
-            Assert.Equal(2, entities.Count());
+            Repository.Verify(x => x.GetAll(), Times.Once);            
+            entities.Should().NotBeNull();
+            entities.Should().HaveCount(2);
+
         }
 
         [Fact]
@@ -72,8 +75,8 @@ namespace GNB_TransRates.Tests
 
             // Assert
             Repository.Verify(x => x.GetById(testId), Times.Once);
-            Assert.Equal("EUR", l.FromCurr);
-            Assert.Equal("USD", l.ToCurr);
+            l.FromCurr.Should().Be("EUR");
+            l.ToCurr.Should().Be("USD");
         }
 
         [Fact]
@@ -95,8 +98,10 @@ namespace GNB_TransRates.Tests
             // Assert
             Repository.Verify(x => x.GetById(It.IsAny<int>()), Times.Once);
             Repository.Verify(x => x.Insert(It.IsAny<Rates>()), Times.Once);
+
             var entities = Service.GetAsync().Result;
-            Assert.Equal(3, entities.Count());
+            entities.Should().NotBeNull();
+            entities.Should().HaveCount(3);
         }
 
     }
