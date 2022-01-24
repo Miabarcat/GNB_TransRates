@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GNB_TransRates.DAL.Models;
+using GNB_TransRates.DL.Infrastructure;
 using GNB_TransRates.DL.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Linq.Expressions;
 
@@ -11,12 +13,16 @@ namespace GNB_TransRates.DL.Services
         private readonly IBaseService<Transactions> _transactionsService;
         private readonly IBaseService<Rates> _ratesService;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
+        private readonly IErrorHandler _errorHandler;        
 
-        public TransactionsService(IBaseService<Transactions> transactionsService, IBaseService<Rates> ratesService, IMapper mapper)
+        public TransactionsService(IBaseService<Transactions> transactionsService, IBaseService<Rates> ratesService, IMapper mapper, ILoggerFactory loggerFactory, IErrorHandler errorHandler)
         {
-            this._transactionsService = transactionsService;
-            this._ratesService = ratesService;
-            this._mapper = mapper;
+            _transactionsService = transactionsService;
+            _ratesService = ratesService;
+            _mapper = mapper;
+            _errorHandler = errorHandler;
+            _logger = loggerFactory.CreateLogger("TransactionsLog");
         }
 
         #region public
@@ -25,7 +31,11 @@ namespace GNB_TransRates.DL.Services
             await SetTransactions();
 
             var result = await _transactionsService.GetAsync();
-            return result.Select(t => _mapper.Map<Transactions, TransactionsResponseModel>(t));
+            var ret = result.Select(t => _mapper.Map<Transactions, TransactionsResponseModel>(t));
+
+            _logger.LogInformation("GetAsyncTransactions - {DateTimeNow}", DateTime.Now);
+
+            return ret;
         }
 
         public async Task<TransactionsBySkuResponseModel> GetTransactionsSkuAsync(string sku)
@@ -34,18 +44,28 @@ namespace GNB_TransRates.DL.Services
 
             var res = await TransactionsConversion(lsTrans);
 
+            if (!res.Any()) throw new ArgumentNullException(string.Format(_errorHandler.GetMessage(ErrorMessagesEnum.NotFound), "Not data found from " + sku + " sku"));
+
             decimal total = Math.Round(res.Sum(s => s.amount), 2, MidpointRounding.ToEven);
 
-            return new TransactionsBySkuResponseModel()
+            var ret = new TransactionsBySkuResponseModel()
             {
                 Total = total,
                 Transactions = res.Select(t => _mapper.Map<Transactions, TransactionsResponseModel>(t)).ToList()
             };
+
+            _logger.LogInformation("GetBySku {sku} - {DateTimeNow}", sku, DateTime.Now);
+
+            return ret;
         }
 
         public async Task<TransactionsResponseModel> GetById(int id)
         {
-            return _mapper.Map<Transactions, TransactionsResponseModel>(await _transactionsService.GetById(id));
+            var ret = _mapper.Map<Transactions, TransactionsResponseModel>(await _transactionsService.GetById(id));
+
+            _logger.LogInformation("GetById {id} - {DateTimeNow}", id, DateTime.Now);
+
+            return ret;
         }
 
         public IEnumerable<TransactionsResponseModel> Where(Expression<Func<Transactions, bool>> exp)
@@ -57,6 +77,8 @@ namespace GNB_TransRates.DL.Services
         public void AddOrUpdate(TransactionsResponseModel entry)
         {
             _transactionsService.AddOrUpdate(_mapper.Map<TransactionsResponseModel, Transactions>(entry));
+
+            _logger.LogInformation("AddOrUpdate Sku: {Sku}, amount: {amount}, Currency: {Currency} - {DateTime}", entry.Sku, entry.amount, entry.Currency, DateTime.Now);
         }
 
         public void Remove(int id)

@@ -1,4 +1,3 @@
-using GNB_TransRates.API.Middlewares;
 using GNB_TransRates.DAL.Contexts;
 using GNB_TransRates.DAL.Models;
 using GNB_TransRates.DL.Infrastructure;
@@ -27,8 +26,6 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseSwagger();
-
-app.UseMiddleware(typeof(ErrorHandlingMiddleware));
 
 app.MapControllers();
 

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GNB_TransRates.DAL.Models;
 using GNB_TransRates.DL.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Linq.Expressions;
 
@@ -10,11 +11,13 @@ namespace GNB_TransRates.DL.Services
     {
         private readonly IBaseService<Rates> _ratesService;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public RatesService(IBaseService<Rates> ratesService, IMapper mapper)
+        public RatesService(IBaseService<Rates> ratesService, IMapper mapper, ILoggerFactory loggerFactory)
         {
             this._ratesService = ratesService;
             this._mapper = mapper;
+            this._logger = loggerFactory.CreateLogger("RatesLog");
         }
 
         #region public
@@ -23,12 +26,20 @@ namespace GNB_TransRates.DL.Services
             await SetRates();
 
             var result = await _ratesService.GetAsync();
-            return result.Select(t => _mapper.Map<Rates, RatesResponseModel>(t));
+            var ret =  result.Select(t => _mapper.Map<Rates, RatesResponseModel>(t));
+
+            _logger.LogInformation("GetAsyncRates - {DateTimeNow}", DateTime.Now);
+
+            return ret;
         }
 
         public async Task<RatesResponseModel> GetById(int id)
         {
-            return _mapper.Map<Rates, RatesResponseModel>(await _ratesService.GetById(id));
+            var ret = _mapper.Map<Rates, RatesResponseModel>(await _ratesService.GetById(id));
+
+            _logger.LogInformation("GetById {Id} - {DateTimeNow}", id, DateTime.Now);
+
+            return ret;
         }
 
         public IEnumerable<RatesResponseModel> Where(Expression<Func<Rates, bool>> exp)
@@ -40,6 +51,8 @@ namespace GNB_TransRates.DL.Services
         public void AddOrUpdate(RatesResponseModel entry)
         {
             _ratesService.AddOrUpdate(_mapper.Map<RatesResponseModel, Rates>(entry));
+
+            _logger.LogInformation("AddOrUpdate from: {From}, to: {To}, rate: {Rate} - {DateTime}", entry.From, entry.To, entry.Rate,DateTime.Now);
         }
 
         public void Remove(int id)
@@ -60,12 +73,16 @@ namespace GNB_TransRates.DL.Services
             if (newRates != null && newRates.Any())
             {
                 var oldRates = await _ratesService.GetAsync();
-                
+
                 _ratesService.RemoveRange(oldRates);
 
                 ConvEur(ref newRates);
 
                 _ratesService.InsertRange(_mapper.Map<List<RatesResponseModel>, List<Rates>>(newRates));
+            }
+            else 
+            { 
+                
             }
         }
 

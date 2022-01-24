@@ -5,7 +5,6 @@ namespace GNB_TransRates.DL.Infrastructure
     public interface IErrorHandler
     {
         string GetMessage(ErrorMessagesEnum message);
-        string ErrorIdentityResult(IdentityResult result);
     }
 
 
@@ -13,12 +12,6 @@ namespace GNB_TransRates.DL.Infrastructure
     {
         EntityNull = 1,
         ModelValidation = 2,
-        AuthUserDoesNotExists = 3,
-        AuthWrongCredentials = 4,
-        AuthCannotCreate = 5,
-        AuthCannotDelete = 6,
-        AuthCannotUpdate = 7,
-        AuthNotValidInformations = 8,
-        AuthCannotRetrieveToken = 9
+        NotFound = 3
     }
 }

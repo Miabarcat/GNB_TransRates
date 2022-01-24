@@ -10,23 +10,54 @@ namespace GNB_TransRates.Controllers
     public class TransactionsController : Controller
     {
         private readonly ITransactionsService _service;
+        private readonly ILogger _logger;
 
-        public TransactionsController(ITransactionsService service)
+        public TransactionsController(ITransactionsService service, ILoggerFactory loggerFactory)
         {
             this._service = service;
+            _logger = loggerFactory.CreateLogger("TransactionsConLog");
         }
 
         [HttpGet("list")]
-        public async Task<IEnumerable<TransactionsResponseModel>> Get()
+        public async Task<ActionResult> Get()
         {
-            return await _service.GetAsync();
+            try
+            {
+                var ret = await _service.GetAsync();
+
+                return Ok(JsonConvert.SerializeObject(ret, Formatting.Indented));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Exception: {ex} ", ex.Message);
+
+                return BadRequest(ex.Message);
+            }
+
+            
         }
 
         [HttpGet("listbysku")]
-        public async Task<TransactionsBySkuResponseModel> GetTransactionsBySku(string sku)
+        public async Task<ActionResult> GetTransactionsBySku(string sku)
         {
-            return  await _service.GetTransactionsSkuAsync(sku);
-        }
+            try { 
+                var ret = await _service.GetTransactionsSkuAsync(sku);
+
+                return Ok(JsonConvert.SerializeObject(ret, Formatting.Indented));
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() == typeof(ArgumentNullException))
+                {
+                    _logger.LogError("Exception: {ex} ", ex.Message);
+
+                    return NotFound(ex.Message);
+                }
+                _logger.LogError("Exception: {ex} ", ex.Message);
+
+                return BadRequest(ex.Message);
+    }
+}
     }
 }
 
